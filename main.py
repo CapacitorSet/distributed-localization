@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.linalg import orth
+from scipy.sparse.csgraph import connected_components
+import networkx as nx
 from matplotlib import pyplot
 import matplotlib
 matplotlib.use('TkAgg')
@@ -8,6 +10,7 @@ import itertools
 num_sensors = 25
 num_measurements = 1
 RSS_std_dev = 0 # .5 # standard deviation of the RSS noise
+connection_distance = 4 # the threshold distance for two sensors to be connected
 ist_lambda = 1e-4
 ist_tau = .7
 ist_max_iterations = 1000
@@ -21,13 +24,21 @@ def RSS_model(d):
         return P_t - 40.2 - 20*np.log(d) + eta
     else:
         return P_t - 58.5 - 33*np.log(d) + eta
-
-sensor_positions = 10*np.random.rand(num_sensors, 2) # eg. [[1.8 4.3], [5.5 7.6]]
-# todo: check if network is connected
-reference_points = np.array(list(itertools.product(np.linspace(0, 9, 10), np.linspace(0, 9, 10)))) # [0, 0], [0, 1].. [0, 9], [1, 0]... [9, 9]
-
 def distance(a, b):
     return np.linalg.norm(a - b)
+
+reference_points = np.array(list(itertools.product(np.linspace(0, 9, 10), np.linspace(0, 9, 10)))) # [0, 0], [0, 1].. [0, 9], [1, 0]... [9, 9]
+sensor_positions = 10*np.random.rand(num_sensors, 2) # eg. [[1.8 4.3], [5.5 7.6]]
+graph = np.zeros((num_sensors, num_sensors))
+for i in range(num_sensors):
+    for j in range(num_sensors):
+        graph[i][j] = i != j and distance(sensor_positions[i], sensor_positions[j]) <= connection_distance
+nx.draw(nx.from_numpy_matrix(graph))
+pyplot.show()
+num_components, _ = connected_components(graph, directed=False)
+print("Connected components in sensor network:", num_components)
+assert num_components == 1, "The connectivity graph is not connected"
+
 def build_dict_for_sensor(sensor):
     return [RSS_model(distance(point, sensor)) for point in reference_points]
 A = np.array([build_dict_for_sensor(sensor) for sensor in sensor_positions])
