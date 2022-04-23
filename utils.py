@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.linalg import orth
 
 from params import RSS_std_dev, ist_lambda
 
@@ -22,12 +21,6 @@ def build_dict_for_sensor(sensor, reference_points):
 def build_dict_for_sensors(sensor_positions, reference_points):
     return np.array([build_dict_for_sensor(sensor, reference_points) for sensor in sensor_positions])
 
-def feng_orthogonalization(A, y):
-    B = orth(A.T).T
-    A_dagger = np.linalg.pinv(A)
-    z = B @ A_dagger @ y
-    return B, z
-
 def soft_threshold_1d(x):
     """Applies soft thresholding to a number"""
     if abs(x) < ist_lambda:
@@ -38,3 +31,11 @@ def soft_threshold(x):
     """Applies componentwise soft thresholding to a vector"""
     assert np.squeeze(x).ndim == 1, "soft_threshold takes a one-dimensional vector"
     return np.array([soft_threshold_1d(x_i) for x_i in np.asarray(x).reshape(-1)])
+
+def show_1sparse_vector(x):
+    x = normalize(x) # normalize x to get a vector of "probabilities"
+    # these are not real probabilities but it is intuitive to present them as such
+    entries = sorted([(val, *idx) for idx, val in np.ndenumerate(x)], reverse=True)
+    print("Most likely values:")
+    for prob, idx in entries[:5]:
+        print(f" - #{idx} (probability {100*prob:.3f}%)")
