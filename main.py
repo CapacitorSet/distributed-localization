@@ -54,7 +54,7 @@ def local_dist_step(old_x, sensor_id):
     """Performs one step of distributed IST on a single node"""
     local_A = B[sensor_id] # should have shape (num_targets, )
     local_y = z[sensor_id]
-    consensus = sum([graph[sensor_id][j] * old_x[j] for j in range(0, num_sensors)])
+    consensus = np.average(old_x, axis=0, weights=graph[sensor_id])
     gradient = ist_tau * (local_A.T * (local_y - local_A @ old_x[sensor_id]).T)
     return (soft_threshold(consensus + gradient))
 
