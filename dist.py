@@ -9,6 +9,7 @@ def local_dist_step(old_x, B, z, neighbors, sensor_id):
     """Performs one step of distributed IST on a single node"""
     consensus = np.average(old_x, axis=0, weights=neighbors)
     gradient = ist_tau * (B.T * (z - B @ old_x[sensor_id]).T)
+    # Todo: gradient computation could be vectorized (eg. vectorized B[i] @ x_t[i] is np.sum(B*x_t, axis=1))
     return (soft_threshold(consensus + gradient))
 
 def dist(env: Environment, target: Tuple[float, float], estimate: List[float]) -> List[float]:
