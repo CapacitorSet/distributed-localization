@@ -2,7 +2,7 @@ import numpy as np
 from typing import List, Tuple
 
 from environment import Environment
-from params import ist_max_iterations, ist_tau
+from params import ist_stop_threshold, ist_tau
 from utils import soft_threshold
 
 def ist(env: Environment, target: Tuple[float, float], estimate: List[float], sanity_check=False) -> List[float]:
@@ -15,8 +15,14 @@ def ist(env: Environment, target: Tuple[float, float], estimate: List[float], sa
             print("Does Ax = y hold?", np.array_equiv(A @ x_0, y))
             print("Does Bx = z (Feng orth.) hold?", np.allclose(B @ x_0, z, atol=1e-12, rtol=0)) # account for a small numerical error
         else:
-            print("Sanity checks skipped: estimate != target")
+            # print("Sanity checks skipped: estimate != target")
+            pass
     x_t = estimate
-    for _ in range(ist_max_iterations):
+    num_iterations = 0
+    for _ in range(100000):
+        num_iterations += 1
+        prev_x_t = x_t
         x_t = soft_threshold(x_t + ist_tau * (B.T @ (z - B @ x_t).T))
-    return x_t
+        if np.linalg.norm(x_t - prev_x_t, ord=2) <= ist_stop_threshold:
+            break
+    return x_t, num_iterations

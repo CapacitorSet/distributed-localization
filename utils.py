@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 
 from params import RSS_std_dev, ist_lambda
 
@@ -36,6 +37,10 @@ def show_1sparse_vector(x):
     x = normalize(x) # normalize x to get a vector of "probabilities"
     # these are not real probabilities but it is intuitive to present them as such
     entries = sorted([(val, *idx) for idx, val in np.ndenumerate(x)], reverse=True)
+    # the indices refer to this array.
+    reference_points = np.array(list(itertools.product(
+            np.linspace(0, 9, 10),
+            np.linspace(0, 9, 10))))
     print("Most likely values:")
     for prob, idx in entries[:5]:
-        print(f" - #{idx} (probability {100*prob:.3f}%)")
+        print(f" - {reference_points[idx]} (probability {100*prob:.3f}%)")

@@ -42,6 +42,10 @@ class Environment:
         # print("Connected components in sensor network:", num_components)
         return num_components == 1
     
+    def essential_spectral_radius(self) -> int:
+        "Returns the 2nd largest eigenvalue of the sensor graph"
+        return nx.adjacency_spectrum(nx.from_numpy_array(np.array(self.graph)))[1].real
+
     def measure_RSS(self, target, use_feng=True) -> Tuple[npt.ArrayLike, npt.ArrayLike]:
         """Measures the RSS on each sensor for a given target. Returns the Feng orthogonalized matrices (B, z) or the raw (A, y)"""
         y = np.array([RSS_model(np.linalg.norm(target - sensor)) for sensor in self.sensor_positions])
