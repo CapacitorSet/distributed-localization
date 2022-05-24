@@ -44,7 +44,7 @@ def run_simulation(env: Environment):
     with open("dist.csv", "a", buffering=1) as results_file:
         # print("DIST")
         # Estimates _for each sensor_
-        initial_estimate = np.zeros((25, 100))
+        initial_estimate = np.zeros((env.num_sensors, 100))
         for i in range(0, env.num_sensors):
             # Initial estimate: the target is in position 3
             initial_estimate[i][3] = 1
@@ -61,7 +61,7 @@ def run_simulation(env: Environment):
 
     with open("o-dist.csv", "a", buffering=1) as results_file:
         # O-DIST
-        dist_estimate = np.zeros((25, 100))
+        dist_estimate = np.zeros((env.num_sensors, 100))
         for i in range(0, env.num_sensors):
             # Initial estimate: the target is in position 0
             dist_estimate[i][0] = 1
