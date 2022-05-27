@@ -1,6 +1,5 @@
 import multiprocessing
 from argparse import ArgumentParser
-
 import numpy as np
 # import matplotlib
 # matplotlib.use('TkAgg')
@@ -38,7 +37,7 @@ def run_simulation(env: Environment):
         results_file.write(f"{env.csv_header};{error:.3f};{num_iterations}\n")
         # show_1sparse_vector(ist_estimate)
         # pyplot.plot(x)
-        # pyplot.show()
+        # pyplot.show() 
         # print()
 
     with open("dist.csv", "a", buffering=1) as results_file:

@@ -12,15 +12,23 @@ def local_dist_step(old_x, B, z, neighbors, sensor_id):
     # Todo: gradient computation could be vectorized (eg. vectorized B[i] @ x_t[i] is np.sum(B*x_t, axis=1))
     return (soft_threshold(consensus + gradient))
 
+def norm_iter(x):
+    val=np.linalg.norm(x,ord=2) 
+    if val!=0:
+        print(val)
+    return val < dist_stop_threshold
+
 def dist(env: Environment, target: Tuple[float, float], estimates: List[List[float]], max_iterations=1000) -> List[float]:
     """Performs distributed IST on a network. Returns a 1-sparse vector"""
 
     B, z = env.measure_RSS(target)
     num_iterations = 0
+    prev_estimates = 0
     for _ in range(max_iterations):
-        num_iterations += 1
+        num_iterations += np.apply_along_axis(lambda x: np.linalg.norm(x,ord=2) < dist_stop_threshold, 1, estimates - prev_estimates) 
+        
         prev_estimates = estimates
         estimates = np.array([local_dist_step(estimates, B[i], z[i], env.graph[i], i) for i in range(0, env.num_sensors)])
         if np.linalg.norm(estimates - prev_estimates, ord=2) <= dist_stop_threshold:
             break
-    return estimates, num_iterations
+    return estimates, np.average(num_iterations)

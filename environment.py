@@ -17,7 +17,7 @@ class Environment:
 
     _non_orthogonal_sensor_dict: npt.ArrayLike # the raw RSS dicts per sensor, before Feng orth.
 
-    def __init__(self, num_sensors: int, connection_distance: float, RSS_std_dev = 0.0, failure_chance = 0.0, seed: int = None) -> None:
+    def __init__(self, num_sensors: int, connection_distance: float, RSS_std_dev: float, failure_chance = 0.0, seed: int = None) -> None:
         if seed is not None:
             np.random.seed(seed)
         self.num_sensors = num_sensors
