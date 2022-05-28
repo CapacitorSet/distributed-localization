@@ -22,7 +22,7 @@ def dist(env: Environment, target: Tuple[float, float], estimates: List[List[flo
     """Performs distributed IST on a network. Returns a 1-sparse vector"""
 
     if stubborn:
-        idx_stubborn_sensor = np.random.randint(0,25)
+        idx_stubborn_sensor = np.random.randint(0,env.num_sensors)
         idx_stubborn_estimate = np.random.randint(0,100)
         estimates[idx_stubborn_sensor, :] = 0
         estimates[idx_stubborn_sensor, idx_stubborn_estimate] = 1

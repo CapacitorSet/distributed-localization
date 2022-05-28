@@ -10,6 +10,9 @@ from ist import ist
 from params import *
 from utils import *
 
+
+#Errore con `python3 main.py -r 1 -j 1 -st 1 -n 7 -d 5 -s 11`
+
 def _run_simulation(options):
     try:
         env = Environment(*options)
