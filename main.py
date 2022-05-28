@@ -16,8 +16,10 @@ def _run_simulation(options):
         return run_simulation(env)
     except Exception as e:
         # Do not crash everything if one job crashes
-        print(e)
+        #print(e)
+        raise(e)
 
+import matplotlib.pyplot as plt
 def run_simulation(env: Environment):
     target_idx = np.random.randint(0, 100) # Pick a random target every time, except for O-DIST
 
@@ -29,16 +31,21 @@ def run_simulation(env: Environment):
         initial_estimate = np.zeros(100)
         initial_estimate[initial_estimate_idx] = 1
         # print("Initial estimate:", env.reference_points[initial_estimate_idx])
-        ist_estimate, num_iterations = ist(env, target, initial_estimate, sanity_check=True)
+        ist_estimate, num_iterations, err_list = ist(env, target, initial_estimate, sanity_check=True)
         # position estimate = the ref. point corresponding to the largest component in the est. vector
         position_estimate = env.reference_points[np.argmax(ist_estimate)]
         # print("IST estimate:", position_estimate)
         error = np.linalg.norm(position_estimate - target, ord=2)
         results_file.write(f"{env.csv_header};{error:.3f};{num_iterations}\n")
         # show_1sparse_vector(ist_estimate)
+
+        if env.plot:
+            plt.plot(np.asarray(err_list))
+            plt.show()
         # pyplot.plot(x)
         # pyplot.show() 
         # print()
+
 
     with open("dist.csv", "a", buffering=1) as results_file:
         # print("DIST")
@@ -47,17 +54,20 @@ def run_simulation(env: Environment):
         for i in range(0, env.num_sensors):
             # Initial estimate: the target is in position 3
             initial_estimate[i][3] = 1
-        dist_estimate, num_iterations = dist(env, target, initial_estimate, max_iterations=100000)
+        dist_estimate, num_iterations, err_list = dist(env, target, initial_estimate, max_iterations=100000, stubborn=False)
         average_estimate = np.average(dist_estimate, axis=0)
         position_estimate = env.reference_points[np.argmax(average_estimate)]
         # print("DIST estimate:", position_estimate)
         error = np.linalg.norm(position_estimate - target, ord=2)
-        results_file.write(f"{env.csv_header};{error:.3f};{num_iterations};{env.essential_spectral_radius():.3f}\n")
+        results_file.write(f"{env.csv_header};{error:.3f};{num_iterations};{env.essential_spectral_radius():.3f}\n") 
+
+        if env.plot:
+            plt.plot(np.asarray(err_list))
+            plt.show()
         # show_1sparse_vector(average_estimate)
         # pyplot.plot(x)
         # pyplot.show()
         # print()
-
     with open("o-dist.csv", "a", buffering=1) as results_file:
         # O-DIST
         dist_estimate = np.zeros((env.num_sensors, 100))
@@ -71,7 +81,7 @@ def run_simulation(env: Environment):
         while target[0] != 10 and target[1] != 10:
             # print(f"O-DIST iteration #{i}, target is {target}")
             # dist_estimate = dist(env, target, dist_estimate, max_iterations=500)
-            dist_estimate, _ = dist(env, target, dist_estimate, max_iterations=500)
+            dist_estimate, _, _ = dist(env, target, dist_estimate, max_iterations=500)
             average_estimate = np.average(dist_estimate, axis=0)
             # show_1sparse_vector(average_estimate)
             position_estimate = env.reference_points[np.argmax(average_estimate)]
@@ -82,7 +92,7 @@ def run_simulation(env: Environment):
             # print(f"Cumulative error: {cumulative_error}")
             # print()
             results_file.write(f"{env.csv_header};{i};{error:.3f};{cumulative_error:.3f}\n")
-
+    
             if movement_direction == "x":
                 target[0] = min(target[0] + 1, 10)
                 movement_direction = "y"
@@ -90,6 +100,7 @@ def run_simulation(env: Environment):
                 target[1] = min(target[1] + 1, 10)
                 movement_direction = "x"
             i = i + 1
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -106,18 +117,30 @@ if __name__ == "__main__":
                         help="Standard deviation of the measurement noise (default 0.5; split with commas to try several values)")
     parser.add_argument("-f", "--failure", dest="failure", metavar="CHANCE", default="0", type=str,
                         help="Probability of the connection between two sensors to fail at a given step, used to simulate time-varying topology (default 0; split with commas to try several values)")
+    parser.add_argument("-st", "--stubborn", dest="stubborn", metavar="stubborn", default=0, type=bool,
+                        help="Test the system with a stubborn agent (0: False, 1: True; default: 0)")
+   
     args = parser.parse_args()
 
+    if args.runs == 1:
+        plot = True
+    else:
+        plot = False
+
+
+    #args.stubborn = args.stubborn == 1
+    
     sensor_nums = [int(n) for n in args.num_sensors.split(",")]
     connection_distances = [float(d) for d in args.connection_distance.split(",")]
     noises = [float(n) for n in args.noise.split(",")]
     failures = [float(p) for p in args.failure.split(",")]
 
     # Iterate over all combinations, i.e. over the cartesian product of the arrays of possible options
-    elements = itertools.product(sensor_nums, connection_distances, noises, failures, range(0, args.runs)) # The order must match that of the arguments of Environment()
+    elements = itertools.product(sensor_nums, connection_distances, noises, failures, range(0, args.runs),[args.stubborn],[plot]) # The order must match that of the arguments of Environment()
     num_elements = args.runs*len(sensor_nums)*len(connection_distances)*len(noises)*len(failures)
     print(f"Running {len(sensor_nums)*len(connection_distances)*len(noises)*len(failures)} combinations {args.runs} times each")
 
+    
     with multiprocessing.Pool(args.jobs) as p:
         i = 0
         for _ in p.imap_unordered(_run_simulation, elements):

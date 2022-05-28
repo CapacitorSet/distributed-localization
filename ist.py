@@ -19,10 +19,13 @@ def ist(env: Environment, target: Tuple[float, float], estimate: List[float], sa
             pass
     x_t = estimate
     num_iterations = 0
+    error_list = []
     for _ in range(100000):
         num_iterations += 1
         prev_x_t = x_t
         x_t = soft_threshold(x_t + ist_tau * (B.T @ (z - B @ x_t).T))
-        if np.linalg.norm(x_t - prev_x_t, ord=2) <= ist_stop_threshold:
+        error = np.linalg.norm(x_t - prev_x_t, ord=2)
+        error_list.append(error)
+        if error <= ist_stop_threshold:
             break
-    return x_t, num_iterations
+    return x_t, num_iterations, error_list

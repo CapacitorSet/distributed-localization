@@ -18,17 +18,29 @@ def norm_iter(x):
         print(val)
     return val < dist_stop_threshold
 
-def dist(env: Environment, target: Tuple[float, float], estimates: List[List[float]], max_iterations=1000) -> List[float]:
+def dist(env: Environment, target: Tuple[float, float], estimates: List[List[float]], max_iterations=1000, stubborn=True) -> List[float]:
     """Performs distributed IST on a network. Returns a 1-sparse vector"""
+
+    if stubborn:
+        idx_stubborn_sensor = np.random.randint(0,25)
+        idx_stubborn_estimate = np.random.randint(0,100)
+        estimates[idx_stubborn_sensor, :] = 0
+        estimates[idx_stubborn_sensor, idx_stubborn_estimate] = 1
 
     B, z = env.measure_RSS(target)
     num_iterations = 0
-    prev_estimates = 0
+    prev_estimates = estimates
+    err_list = []
     for _ in range(max_iterations):
         num_iterations += np.apply_along_axis(lambda x: np.linalg.norm(x,ord=2) < dist_stop_threshold, 1, estimates - prev_estimates) 
         
         prev_estimates = estimates
         estimates = np.array([local_dist_step(estimates, B[i], z[i], env.graph[i], i) for i in range(0, env.num_sensors)])
-        if np.linalg.norm(estimates - prev_estimates, ord=2) <= dist_stop_threshold:
+        if stubborn:
+            estimates[idx_stubborn_sensor, :] = 0
+            estimates[idx_stubborn_sensor, idx_stubborn_estimate] = 1
+        error = np.linalg.norm(estimates - prev_estimates, ord=2)
+        err_list.append(error)
+        if  error <= dist_stop_threshold:
             break
-    return estimates, np.average(num_iterations)
+    return estimates, np.average(num_iterations), err_list
