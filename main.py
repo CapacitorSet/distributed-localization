@@ -43,6 +43,9 @@ def run_simulation(env: Environment):
         # show_1sparse_vector(ist_estimate)
 
         if env.plot:
+            plt.title("IST error")
+            plt.xlabel("Iteration")
+            plt.ylabel("Error")
             plt.plot(np.asarray(err_list))
             plt.show()
         # pyplot.plot(x)
@@ -65,6 +68,9 @@ def run_simulation(env: Environment):
         results_file.write(f"{env.csv_header};{error:.3f};{num_iterations};{env.essential_spectral_radius():.3f}\n") 
 
         if env.plot:
+            plt.title("DIST error")
+            plt.xlabel("Iteration")
+            plt.ylabel("Error")
             plt.plot(np.asarray(err_list))
             plt.show()
         # show_1sparse_vector(average_estimate)
