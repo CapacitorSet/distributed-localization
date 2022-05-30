@@ -42,7 +42,7 @@ class Environment:
         self._non_orthogonal_sensor_dict = np.array([self.build_dict_for_sensor(sensor) for sensor in self.sensor_positions])
 
         self.csv_header = f"{seed};{num_sensors};{connection_distance};{RSS_std_dev};{stubborn}"
-        print(self.graph.astype(float))
+        #print(self.graph.astype(float))
         #print(np.all(np.transpose(self.graph) == self.graph))
     
 

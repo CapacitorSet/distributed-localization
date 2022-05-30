@@ -14,8 +14,6 @@ def local_dist_step(old_x, B, z, neighbors, sensor_id):
 
 def norm_iter(x):
     val=np.linalg.norm(x,ord=2) 
-    if val!=0:
-        print(val)
     return val < dist_stop_threshold
 
 def dist(env: Environment, target: Tuple[float, float], estimates: List[List[float]], max_iterations=1000, stubborn=True) -> List[float]:
