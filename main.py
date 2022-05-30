@@ -11,16 +11,14 @@ from params import *
 from utils import *
 
 
-#Errore con `python3 main.py -r 1 -j 1 -st 1 -n 7 -d 5 -s 11`
-
 def _run_simulation(options):
     try:
         env = Environment(*options)
         return run_simulation(env)
     except Exception as e:
         # Do not crash everything if one job crashes
-        #print(e)
-        raise(e)
+        print(e)
+        # raise(e)
 
 import matplotlib.pyplot as plt
 def run_simulation(env: Environment):
@@ -65,7 +63,7 @@ def run_simulation(env: Environment):
         position_estimate = env.reference_points[np.argmax(average_estimate)]
         # print("DIST estimate:", position_estimate)
         error = np.linalg.norm(position_estimate - target, ord=2)
-        results_file.write(f"{env.csv_header};{error:.3f};{num_iterations};{env.essential_spectral_radius():.3f}\n") 
+        results_file.write(f"{env.csv_header};{error:.3f};{num_iterations};{env.essential_spectral_radius():.3f}\n")
 
         if env.plot:
             plt.title("DIST error")
@@ -101,7 +99,7 @@ def run_simulation(env: Environment):
             # print(f"Cumulative error: {cumulative_error}")
             # print()
             results_file.write(f"{env.csv_header};{i};{error:.3f};{cumulative_error:.3f}\n")
-    
+
             if movement_direction == "x":
                 target[0] = min(target[0] + 1, 10)
                 movement_direction = "y"
@@ -128,7 +126,7 @@ if __name__ == "__main__":
                         help="Probability of the connection between two sensors to fail at a given step, used to simulate time-varying topology (default 0; split with commas to try several values)")
     parser.add_argument("-st", "--stubborn", dest="stubborn", metavar="stubborn", default=0, type=bool,
                         help="Test the system with a stubborn agent (0: False, 1: True; default: 0)")
-   
+
     args = parser.parse_args()
 
     if args.runs == 1:
@@ -137,8 +135,6 @@ if __name__ == "__main__":
         plot = False
 
 
-    #args.stubborn = args.stubborn == 1
-    
     sensor_nums = [int(n) for n in args.num_sensors.split(",")]
     connection_distances = [float(d) for d in args.connection_distance.split(",")]
     noises = [float(n) for n in args.noise.split(",")]
@@ -149,7 +145,6 @@ if __name__ == "__main__":
     num_elements = args.runs*len(sensor_nums)*len(connection_distances)*len(noises)*len(failures)
     print(f"Running {len(sensor_nums)*len(connection_distances)*len(noises)*len(failures)} combinations {args.runs} times each")
 
-    
     with multiprocessing.Pool(args.jobs) as p:
         i = 0
         for _ in p.imap_unordered(_run_simulation, elements):
