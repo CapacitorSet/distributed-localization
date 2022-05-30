@@ -43,7 +43,7 @@ class Environment:
         # Dict setup
         self._non_orthogonal_sensor_dict = np.array([self.build_dict_for_sensor(sensor) for sensor in self.sensor_positions])
 
-        self.csv_header = f"{seed};{num_sensors};{connection_distance};{RSS_std_dev};{failure_chance}"
+        self.csv_header = f"{seed};{num_sensors};{connection_distance};{RSS_std_dev};{failure_chance};{stubborn}"
     
     def is_connected(self) -> bool:
         """Checks if the sensor graph is connected, i.e. not partitioned"""
