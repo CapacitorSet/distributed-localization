@@ -50,7 +50,6 @@ def run_simulation(env: Environment):
         # pyplot.show() 
         # print()
 
-
     with open("dist.csv", "a", buffering=1) as results_file:
         # print("DIST")
         # Estimates _for each sensor_
@@ -75,6 +74,7 @@ def run_simulation(env: Environment):
         # pyplot.plot(x)
         # pyplot.show()
         # print()
+
     with open("o-dist.csv", "a", buffering=1) as results_file:
         # O-DIST
         dist_estimate = np.zeros((env.num_sensors, 100))
@@ -141,6 +141,13 @@ if __name__ == "__main__":
     elements = itertools.product(sensor_nums, connection_distances, noises, range(0, args.runs),[args.stubborn],[plot]) # The order must match that of the arguments of Environment()
     num_elements = args.runs*len(sensor_nums)*len(connection_distances)*len(noises)
     print(f"Running {len(sensor_nums)*len(connection_distances)*len(noises)} combinations {args.runs} times each")
+
+    with open("ist.csv", "a") as f:
+        f.write("seed;num_sensors;connection_distance;RSS_std_dev;stubborn;error;num_iterations\n")
+    with open("dist.csv", "a") as f:
+        f.write("seed;num_sensors;connection_distance;RSS_std_dev;stubborn;error;num_iterations;essential_spectral_radius\n")
+    with open("o-dist.csv", "a") as f:
+        f.write("seed;num_sensors;connection_distance;RSS_std_dev;stubborn;i;error;cumulative_error\n")
 
     with multiprocessing.Pool(args.jobs) as p:
         i = 0
