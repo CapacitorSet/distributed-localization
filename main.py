@@ -32,7 +32,9 @@ def run_simulation(env: Environment):
         initial_estimate = np.zeros(100)
         initial_estimate[initial_estimate_idx] = 1
         # print("Initial estimate:", env.reference_points[initial_estimate_idx])
-        ist_estimate, num_iterations, err_list = ist(env, target, initial_estimate, sanity_check=True)
+        ist_estimate, num_iterations, err_list, x_t_list = ist(env, target, initial_estimate, sanity_check=True)
+        x_t_list = np.asarray([env.reference_points[np.argmax(x)] for x in x_t_list])
+        
         # position estimate = the ref. point corresponding to the largest component in the est. vector
         position_estimate = env.reference_points[np.argmax(ist_estimate)]
         # print("IST estimate:", position_estimate)
@@ -44,7 +46,8 @@ def run_simulation(env: Environment):
             plt.title("IST error")
             plt.xlabel("Iteration")
             plt.ylabel("Error")
-            plt.plot(np.asarray(err_list))
+            #plt.plot(np.linalg.norm(x_t_list - target, axis=1))
+            plt.plot(err_list)
             plt.show()
         # pyplot.plot(x)
         # pyplot.show() 

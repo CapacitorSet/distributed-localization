@@ -4,5 +4,5 @@ num_measurements = 1
 # connection_distance = 4 # the threshold distance for two sensors to be connected
 ist_lambda = 1e-4
 ist_tau = .7
-ist_stop_threshold = 1e-2
-dist_stop_threshold = 1e-2
+ist_stop_threshold = 1e-3
+dist_stop_threshold = 1e-3

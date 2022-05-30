@@ -33,6 +33,7 @@ class Environment:
         for i in range(num_sensors):
             for j in range(num_sensors):
                 self.graph[i][j] = i != j and distance(self.sensor_positions[i], self.sensor_positions[j]) <= connection_distance
+        self.graph = self.initialize_Q(self.graph)
         # nx.draw(nx.from_numpy_matrix(graph))
         # pyplot.show()
         assert self.is_connected(), "The connectivity graph is not connected"
@@ -41,17 +42,34 @@ class Environment:
         self._non_orthogonal_sensor_dict = np.array([self.build_dict_for_sensor(sensor) for sensor in self.sensor_positions])
 
         self.csv_header = f"{seed};{num_sensors};{connection_distance};{RSS_std_dev};{stubborn}"
+        print(self.graph.astype(float))
+        #print(np.all(np.transpose(self.graph) == self.graph))
     
+
+    def initialize_Q(self, Q_ones: npt.ArrayLike) -> npt.ArrayLike:
+        Q = Q_ones
+
+        for i in range(len(Q_ones)):
+            in_degree_den = np.sum(Q_ones[i,:])+1
+            Q[i,:] /= in_degree_den
+        
+        return Q
+
     def is_connected(self) -> bool:
         """Checks if the sensor graph is connected, i.e. not partitioned"""
         num_components, _ = connected_components(self.graph, directed=False)
-        print("Connected components in sensor network:", num_components)
+        #print("Connected components in sensor network:", num_components)
         return num_components == 1
     
     def essential_spectral_radius(self) -> int:
         "Returns the 2nd largest eigenvalue of the sensor graph"
-        return nx.adjacency_spectrum(nx.from_numpy_array(np.array(self.graph)))[1].real
+        #print(nx.adjacency_spectrum(nx.from_numpy_array(np.array(self.graph))).real)
+        eig_val, eig_vec = np.linalg.eig(self.graph)
 
+        #reverse the sorted vector so that now it's in descending order
+        eig_val = sorted(eig_val.real)[::-1] 
+        return eig_val[1]
+        
     def RSS_model(self, d):
         """Returns the received signal strength according to IEEE 802.15.4."""
         P_t = 25
