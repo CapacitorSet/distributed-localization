@@ -122,8 +122,6 @@ if __name__ == "__main__":
                         help="The minimum distance for sensors to be interconnected (default 4; split with commas to try several values)")
     parser.add_argument("-s", "--noise", dest="noise", metavar="VARIANCE", default="0.5", type=str,
                         help="Standard deviation of the measurement noise (default 0.5; split with commas to try several values)")
-    parser.add_argument("-f", "--failure", dest="failure", metavar="CHANCE", default="0", type=str,
-                        help="Probability of the connection between two sensors to fail at a given step, used to simulate time-varying topology (default 0; split with commas to try several values)")
     parser.add_argument("-st", "--stubborn", dest="stubborn", metavar="stubborn", default=0, type=bool,
                         help="Test the system with a stubborn agent (0: False, 1: True; default: 0)")
 
@@ -138,12 +136,11 @@ if __name__ == "__main__":
     sensor_nums = [int(n) for n in args.num_sensors.split(",")]
     connection_distances = [float(d) for d in args.connection_distance.split(",")]
     noises = [float(n) for n in args.noise.split(",")]
-    failures = [float(p) for p in args.failure.split(",")]
 
     # Iterate over all combinations, i.e. over the cartesian product of the arrays of possible options
-    elements = itertools.product(sensor_nums, connection_distances, noises, failures, range(0, args.runs),[args.stubborn],[plot]) # The order must match that of the arguments of Environment()
-    num_elements = args.runs*len(sensor_nums)*len(connection_distances)*len(noises)*len(failures)
-    print(f"Running {len(sensor_nums)*len(connection_distances)*len(noises)*len(failures)} combinations {args.runs} times each")
+    elements = itertools.product(sensor_nums, connection_distances, noises, range(0, args.runs),[args.stubborn],[plot]) # The order must match that of the arguments of Environment()
+    num_elements = args.runs*len(sensor_nums)*len(connection_distances)*len(noises)
+    print(f"Running {len(sensor_nums)*len(connection_distances)*len(noises)} combinations {args.runs} times each")
 
     with multiprocessing.Pool(args.jobs) as p:
         i = 0

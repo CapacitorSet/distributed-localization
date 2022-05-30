@@ -18,15 +18,12 @@ class Environment:
     stubborn: bool
     _non_orthogonal_sensor_dict: npt.ArrayLike # the raw RSS dicts per sensor, before Feng orth.
 
-    def __init__(self, num_sensors: int, connection_distance: float, RSS_std_dev: float, failure_chance = 0.0, seed: int = None, stubborn: int=0, plot: bool = False) -> None:
+    def __init__(self, num_sensors: int, connection_distance: float, RSS_std_dev: float, seed: int = None, stubborn: int=0, plot: bool = False) -> None:
         if seed is not None:
             np.random.seed(seed)
         self.plot = plot
         self.num_sensors = num_sensors
         self.RSS_std_dev = RSS_std_dev
-        # self.failure_chance = failure_chance
-        if failure_chance != 0.0:
-            raise RuntimeError("failure_chance is not yet supported")
         # Environment setup
         self.reference_points = np.array(list(itertools.product(
             np.linspace(0, 9, 10),
@@ -43,7 +40,7 @@ class Environment:
         # Dict setup
         self._non_orthogonal_sensor_dict = np.array([self.build_dict_for_sensor(sensor) for sensor in self.sensor_positions])
 
-        self.csv_header = f"{seed};{num_sensors};{connection_distance};{RSS_std_dev};{failure_chance};{stubborn}"
+        self.csv_header = f"{seed};{num_sensors};{connection_distance};{RSS_std_dev};{stubborn}"
     
     def is_connected(self) -> bool:
         """Checks if the sensor graph is connected, i.e. not partitioned"""
