@@ -91,7 +91,7 @@ def run_simulation(env: Environment):
         while target[0] != 10 and target[1] != 10:
             # print(f"O-DIST iteration #{i}, target is {target}")
             # dist_estimate = dist(env, target, dist_estimate, max_iterations=500)
-            dist_estimate, _, _ = dist(env, target, dist_estimate, max_iterations=500)
+            dist_estimate, _, _ = dist(env, target, dist_estimate)
             average_estimate = np.average(dist_estimate, axis=0)
             # show_1sparse_vector(average_estimate)
             position_estimate = env.reference_points[np.argmax(average_estimate)]
