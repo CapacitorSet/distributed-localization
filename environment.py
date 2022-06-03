@@ -1,3 +1,4 @@
+from cmath import sqrt
 from typing import Tuple
 from scipy.linalg import orth
 from scipy.sparse.csgraph import connected_components
@@ -18,7 +19,7 @@ class Environment:
     stubborn: bool
     _non_orthogonal_sensor_dict: npt.ArrayLike # the raw RSS dicts per sensor, before Feng orth.
 
-    def __init__(self, num_sensors: int, connection_distance: float, RSS_std_dev: float, seed: int = None, stubborn: int=0, plot: bool = False) -> None:
+    def __init__(self, num_sensors: int, connection_distance: float, RSS_std_dev: float, seed: int = None, stubborn: int = 0, plot: bool = False, grid: bool = False) -> None:
         if seed is not None:
             np.random.seed(seed)
         self.plot = plot
@@ -26,9 +27,16 @@ class Environment:
         self.RSS_std_dev = RSS_std_dev
         # Environment setup
         self.reference_points = np.array(list(itertools.product(
-            np.linspace(0, 9, 10),
-            np.linspace(0, 9, 10))))
-        self.sensor_positions = 10*np.random.rand(num_sensors, 2)
+            np.linspace(0, 10, 10),
+            np.linspace(0, 10, 10)))) # + 0.5 * np.random.rand(100, 2)
+        if grid:
+            sensors_per_side = round(np.sqrt(num_sensors))
+            self.sensor_positions = np.array(list(itertools.product(
+            np.linspace(0, 10, sensors_per_side),
+            np.linspace(0, 10, sensors_per_side))))
+            connection_distance = 0.1 + 10.0/(sensors_per_side - 1)
+        else:
+            self.sensor_positions = 10*np.random.rand(num_sensors, 2)
         self.graph = np.zeros((num_sensors, num_sensors))
         for i in range(num_sensors):
             for j in range(num_sensors):
