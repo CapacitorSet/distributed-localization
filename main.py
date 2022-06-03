@@ -152,8 +152,14 @@ if __name__ == "__main__":
     with open("o-dist.csv", "a") as f:
         f.write("seed;num_sensors;connection_distance;RSS_std_dev;stubborn;i;error;cumulative_error\n")
 
-    with multiprocessing.Pool(args.jobs) as p:
-        i = 0
-        for _ in p.imap_unordered(_run_simulation, elements):
-            i = i + 1
-            print(f"Simulation progress: {100*i/num_elements}%")
+    DEBUG = False # Runs with a single thread for cleaner stack traces
+
+    if DEBUG:
+        for element in elements:
+            _run_simulation(element)
+    else:
+        with multiprocessing.Pool(args.jobs) as p:
+            i = 0
+            for _ in p.imap_unordered(_run_simulation, elements):
+                i = i + 1
+                print(f"Simulation progress: {100*i/num_elements}%")
