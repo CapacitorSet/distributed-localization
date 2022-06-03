@@ -75,7 +75,7 @@ class Environment:
         P_t = 25
         eta = np.random.normal(scale=self.RSS_std_dev) # noise
         if d <= 8:
-            return P_t - 40.2 - 20*np.log(d) + eta
+            return min(P_t - 40.2 - 20*np.log(d) + eta, -10)
         else:
             return P_t - 58.5 - 33*np.log(d) + eta
 
